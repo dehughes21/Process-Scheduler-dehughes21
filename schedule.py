@@ -1,4 +1,3 @@
-
 def getNumProcs(fname):
     i = 0
     with open(fname, 'r') as file:
@@ -42,7 +41,7 @@ def getSchedule():
                     process_data[i].append(e_time)
                 t_time = FCFS.calculateTurnaroundTime(self, process_data)
                 w_time = FCFS.calculateWaitingTime(self, process_data)
-                FCFS.printData(self, process_data, t_time, w_time)
+                FCFS.printData(self, process_data, t_time, w_time, s_time, e_time)
 
             def calculateTurnaroundTime(self, process_data):
                 total_turnaround_time = 0
@@ -74,7 +73,7 @@ def getSchedule():
                 '''
                 return average_waiting_time
 
-            def printData(self, process_data, average_turnaround_time, average_waiting_time):
+            def printData(self, process_data, average_turnaround_time, average_waiting_time, start_time, end_time):
 
                 print("Process_ID  Arrival_Time  Burst_Time  Completion_Time  Turnaround_Time  Waiting_Time")
 
@@ -86,6 +85,11 @@ def getSchedule():
                 print(f'Average Turnaround Time: {average_turnaround_time}')
 
                 print(f'Average Waiting Time: {average_waiting_time}')
+                for i in range(len(process_data)):
+                    tEnd = process_data[i][3]
+                    tStart = tEnd - process_data[i][2]
+                    print(str(tStart) + ":" + "pid" + str(process_data[i][0]), end=" ")
+                print(" ")
 
         if __name__ == "__main__":
             fcfs = FCFS()
@@ -200,6 +204,17 @@ def getSchedule():
                 return average_waiting_time
 
             def printData(self, process_data, average_turnaround_time, average_waiting_time):
+                process_data.sort(key=lambda x: x[4])
+                for i in range(len(process_data)):
+                    pid = str(process_data[i][0])
+
+                    tArr = str(process_data[i][1])
+                    if i == 0:
+                        print((tArr + ":" + "pid" + pid), end=" ")
+                    else:
+                        tComp = str(process_data[i-1][4])  # Gives completion time of PREVIOUS process
+                        print((tComp + ":pid" + pid), end=" ")
+                print(" ")
                 process_data.sort(key=lambda x: x[0])
                 '''
                 Sort processes according to the Process ID
@@ -215,6 +230,7 @@ def getSchedule():
                 print(f'Average Turnaround Time: {average_turnaround_time}')
 
                 print(f'Average Waiting Time: {average_waiting_time}')
+
         sjf = SJF()
         sjf.processData("procs")
 
@@ -297,8 +313,10 @@ def getSchedule():
                             2] == 0:  # If Burst Time of a process is 0, it means the process is completed
                             process_data[k][3] = 1
                             process_data[k].append(e_time)
+
                 t_time = STCF.calculateTurnaroundTime(self, process_data)
                 w_time = STCF.calculateWaitingTime(self, process_data)
+                print(process_data)
                 STCF.printData(self, process_data, t_time, w_time, sequence_of_process)
 
             def calculateTurnaroundTime(self, process_data):
@@ -345,6 +363,17 @@ def getSchedule():
                 print(f'Average Turnaround Time: {average_turnaround_time}')
                 print(f'Average Waiting Time: {average_waiting_time}')
                 print(f'Sequence of Process: {sequence_of_process}')
+                for i in range(len(sequence_of_process)):
+                    if i == 0:
+                        pid = str(sequence_of_process[0])
+                        print(("0:pid" + pid), end=" ")
+                    elif i != 0:
+                        if sequence_of_process[i] != sequence_of_process[i-1]:
+                            tComp = str(i)
+                            pid = str(sequence_of_process[i])
+                            print((tComp + ":pid" + pid), end=" ")
+                    if i == len(sequence_of_process)-1:
+                        print("END:" + str(i))
 
         if __name__ == "__main__":
             stcf = STCF()
@@ -485,7 +514,7 @@ def getSchedule():
                             process_data[j].append(e_time)
                 t_time = RoundRobin.calculateTurnaroundTime(self, process_data)
                 w_time = RoundRobin.calculateWaitingTime(self, process_data)
-                RoundRobin.printData(self, process_data, t_time, w_time, executed_process)
+                RoundRobin.printData(self, process_data, t_time, w_time, executed_process, time_slice)
 
             def calculateTurnaroundTime(self, process_data):
                 total_turnaround_time = 0
@@ -517,7 +546,7 @@ def getSchedule():
                 '''
                 return average_waiting_time
 
-            def printData(self, process_data, average_turnaround_time, average_waiting_time, executed_process):
+            def printData(self, process_data, average_turnaround_time, average_waiting_time, executed_process, ts):
                 process_data.sort(key=lambda x: x[0])
                 '''
                 Sort processes according to the Process ID
@@ -534,13 +563,21 @@ def getSchedule():
                 print(f'Average Waiting Time: {average_waiting_time}')
 
                 print(f'Sequence of Processes: {executed_process}')
+                for i in range(len(executed_process)):
+                    if i == 0:
+                        pid = str(executed_process[0])
+                        print(("0:pid" + pid), end=" ")
+                    elif i != 0:
+                        if executed_process[i] != executed_process[i-1]:
+                            tComp = str(ts*i)
+                            pid = str(executed_process[i])
+                            print((tComp + ":pid" + pid), end=" ")
+                    if i == len(executed_process)-1:
+                        print("END:" + str(ts*i))
 
         if __name__ == "__main__":
             rr = RoundRobin()
             rr.processData("procs")
-
-        rr = RoundRobin()
-        rr.processData("procs")
 
 
 getSchedule()
