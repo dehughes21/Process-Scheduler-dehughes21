@@ -95,7 +95,6 @@ def getSchedule():
             fcfs = FCFS()
             fcfs.processData("procs")
 
-
     elif alg == "sjf":
 
         class SJF:
@@ -212,7 +211,7 @@ def getSchedule():
                     if i == 0:
                         print((tArr + ":" + "pid" + pid), end=" ")
                     else:
-                        tComp = str(process_data[i-1][4])  # Gives completion time of PREVIOUS process
+                        tComp = str(process_data[i - 1][4])  # Gives completion time of PREVIOUS process
                         print((tComp + ":pid" + pid), end=" ")
                 print(" ")
                 process_data.sort(key=lambda x: x[0])
@@ -362,22 +361,27 @@ def getSchedule():
                     print()
                 print(f'Average Turnaround Time: {average_turnaround_time}')
                 print(f'Average Waiting Time: {average_waiting_time}')
+                rSum = 0
+                for s in range(len(process_data)):
+                    PID = process_data[s][0]
+                    rSum += sequence_of_process.index(PID)
+                rTime_avg = rSum/len(process_data)
+                print("Average Response Time: " + str(rTime_avg))
                 print(f'Sequence of Process: {sequence_of_process}')
                 for i in range(len(sequence_of_process)):
                     if i == 0:
                         pid = str(sequence_of_process[0])
                         print(("0:pid" + pid), end=" ")
                     elif i != 0:
-                        if sequence_of_process[i] != sequence_of_process[i-1]:
+                        if sequence_of_process[i] != sequence_of_process[i - 1]:
                             tComp = str(i)
                             pid = str(sequence_of_process[i])
                             print((tComp + ":pid" + pid), end=" ")
-                    if i == len(sequence_of_process)-1:
+                    if i == len(sequence_of_process) - 1:
                         print("END:" + str(i))
 
-        if __name__ == "__main__":
-            stcf = STCF()
-            stcf.processData("procs")
+        stcf = STCF()
+        stcf.processData("procs")
 
     elif alg == "rr":
         class RoundRobin:
@@ -553,31 +557,49 @@ def getSchedule():
                 '''
                 print(
                     "Process_ID  Arrival_Time  Rem_Burst_Time   Completed  Original_Burst_Time  Completion_Time  Turnaround_Time  Waiting_Time")
-                for i in range(len(process_data)):
-                    for j in range(len(process_data[i])):
-                        print(process_data[i][j], end="				")
-                    print()
 
                 print(f'Average Turnaround Time: {average_turnaround_time}')
 
                 print(f'Average Waiting Time: {average_waiting_time}')
 
+                print(process_data)
                 print(f'Sequence of Processes: {executed_process}')
+                run = [0]
                 for i in range(len(executed_process)):
-                    if i == 0:
-                        pid = str(executed_process[0])
-                        print(("0:pid" + pid), end=" ")
-                    elif i != 0:
-                        if executed_process[i] != executed_process[i-1]:
-                            tComp = str(ts*i)
-                            pid = str(executed_process[i])
-                            print((tComp + ":pid" + pid), end=" ")
-                    if i == len(executed_process)-1:
-                        print("END:" + str(ts*i))
-
-        if __name__ == "__main__":
-            rr = RoundRobin()
-            rr.processData("procs")
+                    pid = executed_process[i]
+                    for k in range(len(process_data)):
+                        if process_data[k][0] == pid:
+                            tBurst = process_data[k][4]
+                            if tBurst > ts:
+                                process_data[k][4] -= ts
+                                run.append(ts)
+                            elif tBurst <= ts:
+                                process_data[k][4] = 0
+                                run.append(tBurst)
+                    if i == len(executed_process) - 1:
+                        finalBurst = tBurst
+                    timeList = []
+                    sum = 0
+                    for r in range(len(run)):
+                        if r != 0:
+                            sum += run[r - 1]
+                            timeList.append(sum)
+                for u in range(len(timeList)):
+                    pid = str(executed_process[u])
+                    time = str(timeList[u])
+                    print((time + ":pid" + pid), end=" ")
+                print(str(finalBurst + timeList[len(timeList) - 1]) + ":END")
+                print(timeList)
+                rSum = 0
+                for n in range(len(process_data)):
+                    PID = process_data[n][0]
+                    index = executed_process.index(PID)
+                    res = timeList[index]
+                    rSum += res
+                resTime = rSum/len(process_data)
+                print("Average Response Time: " + str(resTime))
+        rr = RoundRobin()
+        rr.processData("procs")
 
 
 getSchedule()
