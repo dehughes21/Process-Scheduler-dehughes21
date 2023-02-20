@@ -1,5 +1,6 @@
 import random
 
+
 def getNumProcs(fname):
     i = 0
     with open(fname, 'r') as file:
@@ -8,7 +9,7 @@ def getNumProcs(fname):
     return i
 
 
-def getSchedule():
+def getSchedule(file):
     alg = input("Which algorithm (fcfs, stcf, sjf, rr)? ")
     if alg == "fcfs":
         class FCFS:
@@ -79,13 +80,13 @@ def getSchedule():
 
                 print("Process_ID  Arrival_Time  Burst_Time  Completion_Time  Turnaround_Time  Waiting_Time")
 
-                for i in range(len(process_data)):
-                    for j in range(len(process_data[i])):
-                        print(process_data[i][j], end="				")
-                    print()
-
+                print(process_data)
+                resSum = 0
+                for x in range(len(process_data)):
+                    resSum += process_data[x][5]
+                resTime = resSum/len(process_data)
                 print(f'Average Turnaround Time: {average_turnaround_time}')
-
+                print("Average Response Time: " + str(resTime))
                 print(f'Average Waiting Time: {average_waiting_time}')
                 for i in range(len(process_data)):
                     tEnd = process_data[i][3]
@@ -93,9 +94,8 @@ def getSchedule():
                     print(str(tStart) + ":" + "pid" + str(process_data[i][0]), end=" ")
                 print(" ")
 
-        if __name__ == "__main__":
-            fcfs = FCFS()
-            fcfs.processData("procs")
+        fcfs = FCFS()
+        fcfs.processData(file)
 
     elif alg == "sjf":
 
@@ -233,7 +233,7 @@ def getSchedule():
                 print(f'Average Waiting Time: {average_waiting_time}')
 
         sjf = SJF()
-        sjf.processData("procs")
+        sjf.processData(file)
 
     elif alg == "stcf":
         class STCF:
@@ -383,7 +383,7 @@ def getSchedule():
                         print("END:" + str(i))
 
         stcf = STCF()
-        stcf.processData("procs")
+        stcf.processData(file)
 
     elif alg == "rr":
         class RoundRobin:
@@ -602,7 +602,7 @@ def getSchedule():
                 print("Average Response Time: " + str(resTime))
 
         rr = RoundRobin()
-        rr.processData("procs")
+        rr.processData(file)
 
 
 def genProcs():
@@ -623,7 +623,7 @@ def genProcs():
             elif i == 0:
                 tArrive = 0
                 pid = i
-            print((str(pid) + ',' + str(priority) + ',' + str(tArrive) + ',' + str(tBurst)), file = outFile)
+            print((str(pid) + ',' + str(priority) + ',' + str(tArrive) + ',' + str(tBurst)), file=outFile)
 
 
 run = True
@@ -635,6 +635,7 @@ while run:
     elif choice == 1:
         genProcs()
     elif choice == 2:
-        getSchedule()
+        fileName = input("Input name of file containing jobs: ")
+        getSchedule(fileName)
     else:
         'Invalid choice'
