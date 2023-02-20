@@ -1,3 +1,5 @@
+import random
+
 def getNumProcs(fname):
     i = 0
     with open(fname, 'r') as file:
@@ -365,7 +367,7 @@ def getSchedule():
                 for s in range(len(process_data)):
                     PID = process_data[s][0]
                     rSum += sequence_of_process.index(PID)
-                rTime_avg = rSum/len(process_data)
+                rTime_avg = rSum / len(process_data)
                 print("Average Response Time: " + str(rTime_avg))
                 print(f'Sequence of Process: {sequence_of_process}')
                 for i in range(len(sequence_of_process)):
@@ -596,10 +598,43 @@ def getSchedule():
                     index = executed_process.index(PID)
                     res = timeList[index]
                     rSum += res
-                resTime = rSum/len(process_data)
+                resTime = rSum / len(process_data)
                 print("Average Response Time: " + str(resTime))
+
         rr = RoundRobin()
         rr.processData("procs")
 
 
-getSchedule()
+def genProcs():
+    numProcs = int(input("Enter number of processes: "))
+    minPrior = int(input("Enter minimum priority: "))
+    maxPrior = int(input("Enter maximum priority: "))
+    maxArrive = int(input("Enter maximum arrival time: "))
+    minDuration = int(input("Enter minimum duration: "))
+    maxDuration = int(input("Enter maximum duration: "))
+    outF = input("Enter output file name: ")
+    with open(outF, 'w') as outFile:
+        for i in range(numProcs):
+            tBurst = random.randint(minDuration, maxDuration)
+            priority = random.randint(minPrior, maxPrior)
+            if i != 0:
+                tArrive = random.randint(0, maxArrive)
+                pid = i
+            elif i == 0:
+                tArrive = 0
+                pid = i
+            print((str(pid) + ',' + str(priority) + ',' + str(tArrive) + ',' + str(tBurst)), file = outFile)
+
+
+run = True
+while run:
+    choice = int(input("Generate Processes (1) or Get Schedule (2) or Quit(0)? "))
+    if choice == 0:
+        run = False
+        break
+    elif choice == 1:
+        genProcs()
+    elif choice == 2:
+        getSchedule()
+    else:
+        'Invalid choice'
