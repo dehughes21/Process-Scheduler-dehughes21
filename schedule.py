@@ -15,6 +15,7 @@ def getSchedule(file):
         class FCFS:
             def processData(self, fname):
                 process_data = []
+                bursts = {}
                 with open(fname, 'r') as data:
                     for line in data:
                         line = line.split(",")
@@ -24,9 +25,17 @@ def getSchedule(file):
                         arrival_time = int(line[2])
 
                         burst_time = int(line[3])
+                        noStop = int(line[-1])
+
+                        bursts["pid" + str(process_id)] = [int(x) for x in line[4:]]
+                        if noStop == -1:
+                            maxCPUbursts = int(input("Max # of CPU bursts: "))
+                            bursts["pid" + str(process_id)] = [int(x) for x in line[3:]]
 
                         temporary.extend([process_id, arrival_time, burst_time])
                         process_data.append(temporary)
+                print("BURSTS: " + str(bursts))
+                print("PROCESS DATA: " + str(process_data))
                 FCFS.schedulingProcess(self, process_data)
 
             def schedulingProcess(self, process_data):
@@ -84,7 +93,7 @@ def getSchedule(file):
                 resSum = 0
                 for x in range(len(process_data)):
                     resSum += process_data[x][5]
-                resTime = resSum/len(process_data)
+                resTime = resSum / len(process_data)
                 print(f'Average Turnaround Time: {average_turnaround_time}')
                 print("Average Response Time: " + str(resTime))
                 print(f'Average Waiting Time: {average_waiting_time}')
