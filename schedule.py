@@ -15,26 +15,46 @@ def getSchedule(file):
         class FCFS:
             def processData(self, fname):
                 process_data = []
-                bursts = {}
+
+                procBursts = []
                 with open(fname, 'r') as data:
                     for line in data:
+
                         line = line.split(",")
                         temporary = []
-                        process_id = int(line[0])
+                        process_id = (line[0])
 
                         arrival_time = int(line[2])
 
                         burst_time = int(line[3])
                         noStop = int(line[-1])
-
-                        bursts["pid" + str(process_id)] = [int(x) for x in line[4:]]
-                        if noStop == -1:
-                            maxCPUbursts = int(input("Max # of CPU bursts: "))
-                            bursts["pid" + str(process_id)] = [int(x) for x in line[3:]]
+                        bursts = line[4:]
+                        if (len(bursts)) > 0:
+                            IObursts = []
+                            CPUbursts = []
+                            pid = process_id + "*"
+                            for i in range(len(bursts)):
+                                burst = bursts[i].strip()
+                                if i % 2 == 0:
+                                    IObursts.append(burst)
+                                else:
+                                    CPUbursts.append(burst)
+                            procBursts.append([pid, [IObursts, CPUbursts]])
+                            del IObursts, CPUbursts
 
                         temporary.extend([process_id, arrival_time, burst_time])
                         process_data.append(temporary)
-                print("BURSTS: " + str(bursts))
+                time = 0
+                for i in range(len(process_data)):
+                    pid = procBursts[0]
+                    end = process_data[i][2]
+                    print(str(end))
+
+                    if noStop == -1:
+                        maxCPUbursts = int(input("Max # of CPU bursts: "))
+
+                print("PROC_BURSTS: " + str(procBursts))
+
                 print("PROCESS DATA: " + str(process_data))
                 FCFS.schedulingProcess(self, process_data)
 
