@@ -32,9 +32,9 @@ def getSchedule(file):
                         if (len(bursts)) > 0:
                             IObursts = []
                             CPUbursts = []
-                            pid = process_id + "*"
+                            pid = process_id
                             for i in range(len(bursts)):
-                                burst = bursts[i].strip()
+                                burst = int(bursts[i])
                                 if i % 2 == 0:
                                     IObursts.append(burst)
                                 else:
@@ -48,7 +48,6 @@ def getSchedule(file):
                 for i in range(len(process_data)):
                     pid = procBursts[0]
                     end = process_data[i][2]
-                    print(str(end))
 
                     if noStop == -1:
                         maxCPUbursts = int(input("Max # of CPU bursts: "))
@@ -56,26 +55,49 @@ def getSchedule(file):
                 print("PROC_BURSTS: " + str(procBursts))
 
                 print("PROCESS DATA: " + str(process_data))
-                FCFS.schedulingProcess(self, process_data)
+                FCFS.schedulingProcess(self, process_data, procBursts)
 
-            def schedulingProcess(self, process_data):
+            def schedulingProcess(self, process_data, process_bursts):
                 process_data.sort(key=lambda x: x[1])
                 start_time = []
                 exit_time = []
                 s_time = 0
+                print("PD BEFORE SCHEDULE: " + str(process_data))
+                print("UPPER BOUND")
+                i = 0
                 for i in range(len(process_data)):
+                    # process_data.sort(key=lambda x: x[1])
+                    print(str(process_data))
                     if s_time < process_data[i][1]:
                         s_time = process_data[i][1]
+                    pid = process_data[i][0]
                     start_time.append(s_time)
                     s_time = s_time + process_data[i][2]
                     e_time = s_time
                     exit_time.append(e_time)
                     process_data[i].append(e_time)
+                    for k in range(len(process_bursts)):
+                        print("P BURSTS: " + str(process_bursts))
+                        if process_bursts[k][0] == pid and len(process_bursts[k][1][0]) > 0:
+                            print(str(process_bursts[k]))
+                            IOtime = process_bursts[k][1][0].pop(0)
+                            print("IO TIME: " + str(IOtime))
+                            CPUtime = process_bursts[k][1][1].pop(0)
+                            arrival = e_time + IOtime
+                            print("PID: " + pid)
+                            print("ARRIVE: " + str(arrival))
+                            print("BURST TIME: " + str(CPUtime))
+                            process_data.append([pid, arrival, CPUtime])
+                            i -= 1
+                            process_data.sort(key=lambda x: x[1])
+                print("LOWER BOUND")
+                print("PD AFTER SCHEDULE: " + str(process_data))
                 t_time = FCFS.calculateTurnaroundTime(self, process_data)
                 w_time = FCFS.calculateWaitingTime(self, process_data)
                 FCFS.printData(self, process_data, t_time, w_time, s_time, e_time)
 
             def calculateTurnaroundTime(self, process_data):
+                print("TAT " + str(process_data))
                 total_turnaround_time = 0
                 for i in range(len(process_data)):
                     turnaround_time = process_data[i][3] - process_data[i][1]
