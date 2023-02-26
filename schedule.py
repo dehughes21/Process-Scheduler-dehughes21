@@ -51,10 +51,6 @@ def getSchedule(file):
 
                     if noStop == -1:
                         maxCPUbursts = int(input("Max # of CPU bursts: "))
-
-                print("PROC_BURSTS: " + str(procBursts))
-
-                print("PROCESS DATA: " + str(process_data))
                 FCFS.schedulingProcess(self, process_data, procBursts)
 
             def schedulingProcess(self, process_data, process_bursts):
@@ -62,12 +58,8 @@ def getSchedule(file):
                 start_time = []
                 exit_time = []
                 s_time = 0
-                print("PD BEFORE SCHEDULE: " + str(process_data))
-                print("UPPER BOUND")
                 i = 0
                 for i in range(len(process_data)):
-                    # process_data.sort(key=lambda x: x[1])
-                    print(str(process_data))
                     if s_time < process_data[i][1]:
                         s_time = process_data[i][1]
                     pid = process_data[i][0]
@@ -77,27 +69,22 @@ def getSchedule(file):
                     exit_time.append(e_time)
                     process_data[i].append(e_time)
                     for k in range(len(process_bursts)):
-                        print("P BURSTS: " + str(process_bursts))
                         if process_bursts[k][0] == pid and len(process_bursts[k][1][0]) > 0:
-                            print(str(process_bursts[k]))
                             IOtime = process_bursts[k][1][0].pop(0)
-                            print("IO TIME: " + str(IOtime))
                             CPUtime = process_bursts[k][1][1].pop(0)
                             arrival = e_time + IOtime
-                            print("PID: " + pid)
-                            print("ARRIVE: " + str(arrival))
-                            print("BURST TIME: " + str(CPUtime))
                             process_data.append([pid, arrival, CPUtime])
                             i -= 1
-                            process_data.sort(key=lambda x: x[1])
-                print("LOWER BOUND")
-                print("PD AFTER SCHEDULE: " + str(process_data))
+                process_data.sort(key=lambda x: x[1])
+                for l in range(len(process_data)):
+                    if len(process_data[l]) < 4:
+                        ext = process_data[l-1][3] + process_data[l][2]
+                        process_data[l].append(ext)
                 t_time = FCFS.calculateTurnaroundTime(self, process_data)
                 w_time = FCFS.calculateWaitingTime(self, process_data)
                 FCFS.printData(self, process_data, t_time, w_time, s_time, e_time)
 
             def calculateTurnaroundTime(self, process_data):
-                print("TAT " + str(process_data))
                 total_turnaround_time = 0
                 for i in range(len(process_data)):
                     turnaround_time = process_data[i][3] - process_data[i][1]
@@ -128,8 +115,6 @@ def getSchedule(file):
                 return average_waiting_time
 
             def printData(self, process_data, average_turnaround_time, average_waiting_time, start_time, end_time):
-
-                print("Process_ID  Arrival_Time  Burst_Time  Completion_Time  Turnaround_Time  Waiting_Time")
 
                 print(process_data)
                 resSum = 0
