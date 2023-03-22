@@ -59,48 +59,51 @@ def getSchedule(file):
 
             def schedulingProcess(self, process_data, process_bursts):
                 process_data.sort(key=lambda x: x[1])
+                print("BEGIN sp:" + str(process_data))
                 start_time = []
                 exit_time = []
                 s_time = 0
                 print("PD BEFORE SCHEDULE: " + str(process_data))
                 print("UPPER BOUND")
+                len_pData = len(process_data)
                 i = 0
-                for i in range(len(process_data)):
+                while i < len_pData:
+                    print("I: " + str(i))
                     # process_data.sort(key=lambda x: x[1])
                     print(str(process_data))
                     if s_time < process_data[i][1]:
                         s_time = process_data[i][1]
                     pid = process_data[i][0]
                     start_time.append(s_time)
-                    s_time = s_time + process_data[i][2]
-                    e_time = s_time
+                    e_time = s_time + process_data[i][2]
+                    print(str(e_time))
                     exit_time.append(e_time)
-                    process_data[i].append(e_time)
                     for k in range(len(process_bursts)):
-                        print("P BURSTS: " + str(process_bursts))
-                        if process_bursts[k][0] == pid and len(process_bursts[k][1][0]) > 0:
+                        #     print(str(pid))
+                        print("PROCESS BURSTS: " + str(process_bursts))
+                        print("PID: " + str(pid) + "   " + str(process_bursts[k][0]))
+                        if process_bursts[k][0] == pid:
+                            print("match")
                             print(str(process_bursts[k]))
-                            IOtime = process_bursts[k][1][0].pop(0)
-                            print("IO TIME: " + str(IOtime))
-                            CPUtime = process_bursts[k][1][1].pop(0)
-                            arrival = e_time + IOtime
-                            print("PID: " + pid)
-                            print("ARRIVE: " + str(arrival))
-                            print("BURST TIME: " + str(CPUtime))
-                            process_data.append([pid, arrival, CPUtime])
-                            i -= 1
-                            process_data.sort(key=lambda x: x[1])
-                print("LOWER BOUND")
+                            if len(process_bursts[k][1][0]) > 0:
+                                len_pData += 1
+                                IOtime = process_bursts[k][1][0].pop(0)
+                                CPUtime = process_bursts[k][1][1].pop(0)
+                                arrival = e_time + IOtime
+                                process_data.append([pid, arrival, CPUtime])
+                                process_data.sort(key=lambda x: x[1])
+                    # #     print(str(process_data))
+                    i += 1
                 print("PD AFTER SCHEDULE: " + str(process_data))
                 t_time = FCFS.calculateTurnaroundTime(self, process_data)
                 w_time = FCFS.calculateWaitingTime(self, process_data)
                 FCFS.printData(self, process_data, t_time, w_time, s_time, e_time)
 
             def calculateTurnaroundTime(self, process_data):
-                print("TAT " + str(process_data))
                 total_turnaround_time = 0
                 for i in range(len(process_data)):
-                    turnaround_time = process_data[i][3] - process_data[i][1]
+
+                    turnaround_time = process_data[i][2] - process_data[i][1]
                     '''
                     turnaround_time = completion_time - arrival_time
                     '''
@@ -115,7 +118,7 @@ def getSchedule(file):
             def calculateWaitingTime(self, process_data):
                 total_waiting_time = 0
                 for i in range(len(process_data)):
-                    waiting_time = process_data[i][4] - process_data[i][2]
+                    waiting_time = process_data[i][2] - process_data[i][1] -
                     '''
                     waiting_time = turnaround_time - burst_time
                     '''
