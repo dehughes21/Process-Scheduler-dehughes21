@@ -58,6 +58,7 @@ def getSchedule(file):
                 FCFS.schedulingProcess(self, process_data, procBursts)
 
             def schedulingProcess(self, process_data, process_bursts):
+                print("UNALTERED PB " + str(process_bursts))
                 process_data.sort(key=lambda x: x[1])
                 print("BEGIN sp:" + str(process_data))
                 start_time = []
@@ -67,32 +68,32 @@ def getSchedule(file):
                 print("UPPER BOUND")
                 len_pData = len(process_data)
                 i = 0
-                while i < len_pData:
+                time = 0
+                while i < len(process_data):
                     print("I: " + str(i))
-                    # process_data.sort(key=lambda x: x[1])
                     print(str(process_data))
-                    if s_time < process_data[i][1]:
-                        s_time = process_data[i][1]
-                    pid = process_data[i][0]
+
+                    pid, arrival, burst = process_data[i][0], process_data[i][1], process_data[i][2]
+                    if arrival > time:
+                        time = arrival
+                    s_time = time
                     start_time.append(s_time)
-                    e_time = s_time + process_data[i][2]
-                    print(str(e_time))
+                    e_time = s_time + burst
                     exit_time.append(e_time)
+                    process_data[i].append(e_time)
                     for k in range(len(process_bursts)):
                         #     print(str(pid))
-                        print("PROCESS BURSTS: " + str(process_bursts))
-                        print("PID: " + str(pid) + "   " + str(process_bursts[k][0]))
                         if process_bursts[k][0] == pid:
-                            print("match")
-                            print(str(process_bursts[k]))
-                            if len(process_bursts[k][1][0]) > 0:
-                                len_pData += 1
-                                IOtime = process_bursts[k][1][0].pop(0)
-                                CPUtime = process_bursts[k][1][1].pop(0)
-                                arrival = e_time + IOtime
-                                process_data.append([pid, arrival, CPUtime])
-                                process_data.sort(key=lambda x: x[1])
+
+                            IOtime = process_bursts[k][1][0].pop(0)
+                            CPUtime = process_bursts[k][1][1].pop(0)
+                            if len(process_bursts[k][1][0]) == 0:
+                                process_bursts.pop(k)
+                            arrival = e_time + IOtime
+                            process_data.append([pid, arrival, CPUtime])
+                            process_data.sort(key=lambda x: x[1])
                     # #     print(str(process_data))
+                    time += burst
                     i += 1
                 print("PD AFTER SCHEDULE: " + str(process_data))
                 t_time = FCFS.calculateTurnaroundTime(self, process_data)
@@ -103,7 +104,7 @@ def getSchedule(file):
                 total_turnaround_time = 0
                 for i in range(len(process_data)):
 
-                    turnaround_time = process_data[i][2] - process_data[i][1]
+                    turnaround_time = process_data[i][3] - process_data[i][1]
                     '''
                     turnaround_time = completion_time - arrival_time
                     '''
@@ -118,7 +119,7 @@ def getSchedule(file):
             def calculateWaitingTime(self, process_data):
                 total_waiting_time = 0
                 for i in range(len(process_data)):
-                    waiting_time = process_data[i][2] - process_data[i][1] -
+                    waiting_time = process_data[i][4] - process_data[i][2]
                     '''
                     waiting_time = turnaround_time - burst_time
                     '''
@@ -146,7 +147,7 @@ def getSchedule(file):
                     tEnd = process_data[i][3]
                     tStart = tEnd - process_data[i][2]
                     print(str(tStart) + ":" + "pid" + str(process_data[i][0]), end=" ")
-                print(" ")
+                print("END:" + str(tEnd))
 
         fcfs = FCFS()
         fcfs.processData(file)
