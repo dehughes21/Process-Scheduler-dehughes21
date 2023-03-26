@@ -44,10 +44,6 @@ def getSchedule(file):
 
                         temporary.extend([process_id, arrival_time, burst_time])
                         process_data.append(temporary)
-                time = 0
-                for i in range(len(process_data)):
-                    pid = procBursts[0]
-                    end = process_data[i][2]
 
                     if noStop == -1:
                         maxCPUbursts = int(input("Max # of CPU bursts: "))
@@ -80,7 +76,7 @@ def getSchedule(file):
                     start_time.append(s_time)
                     e_time = s_time + burst
                     exit_time.append(e_time)
-                    process_data[i].append(e_time)
+                    process_data[i].append(e_time)  # Identified where a process has ended
                     for k in range(len(process_bursts)):
                         #     print(str(pid))
                         if process_bursts[k][0] == pid:
@@ -103,7 +99,6 @@ def getSchedule(file):
             def calculateTurnaroundTime(self, process_data):
                 total_turnaround_time = 0
                 for i in range(len(process_data)):
-
                     turnaround_time = process_data[i][3] - process_data[i][1]
                     '''
                     turnaround_time = completion_time - arrival_time
@@ -158,6 +153,7 @@ def getSchedule(file):
 
             def processData(self, fname):
                 process_data = []
+                procBursts = []
                 with open(fname, 'r') as data:
                     for line in data:
                         line = line.split(",")
@@ -167,12 +163,49 @@ def getSchedule(file):
                         arrival_time = int(line[2])
 
                         burst_time = int(line[3])
+                        noStop = int(line[-1])
+                        bursts = line[4:]
+                        if len(bursts) > 0:
+                            IObursts = []
+                            CPUbursts = []
+                            for i in range(len(bursts)):
+                                burst = int(bursts[i])
+                                if i % 2 == 0:
+                                    IObursts.append(burst)
+                                else:
+                                    CPUbursts.append(burst)
+                            procBursts.append([process_id, [IObursts, CPUbursts]])
+                            del IObursts, CPUbursts
+
                         temporary.extend([process_id, arrival_time, burst_time, 0])
                         '''
                         '0' is the state of the process. 0 means not executed and 1 means execution complete
                         '''
                         process_data.append(temporary)
+                    if noStop == -1:
+                        maxCPUbursts = int(input("Max # of CPU bursts: "))
+                #SJF.schedulingProcess(self, process_data, procBursts)
                 SJF.schedulingProcess(self, process_data)
+                print("OUT PDATA: " + str(process_data))
+                pids = []
+                while len(procBursts) > 0:
+                    process_data.reverse()
+                    for instance in process_data:
+                        pid, arr, burstTime, end = instance[0], instance[1], instance[2], instance[4]
+                        for b in range(len(procBursts)):
+                            if pid == procBursts[b][0] and (procBursts[b][0] not in pids):
+                                pids.append(pid)
+                                print("BURST: " + str(procBursts[b]))
+                                IOtime = procBursts[b][1][0].pop(0)
+                                CPUtime = procBursts[b][1][1].pop(0)
+                                arriveTime = end + IOtime
+                                process_data.append([pid, arriveTime, CPUtime, 0])
+                                if len(procBursts[b][1][0]) == 0:
+                                    procBursts.pop(b)
+                    print("")
+
+                    procBursts = []
+
 
             def schedulingProcess(self, process_data):
                 start_time = []
@@ -224,10 +257,10 @@ def getSchedule(file):
                                 break
                         process_data[k][3] = 1
                         process_data[k].append(e_time)
-
-                t_time = SJF.calculateTurnaroundTime(self, process_data)
-                w_time = SJF.calculateWaitingTime(self, process_data)
-                SJF.printData(self, process_data, t_time, w_time)
+                #t_time = SJF.calculateTurnaroundTime(self, process_data)
+                #w_time = SJF.calculateWaitingTime(self, process_data)
+                #SJF.printData(self, process_data, t_time, w_time)
+                return process_data
 
             def calculateTurnaroundTime(self, process_data):
                 total_turnaround_time = 0
