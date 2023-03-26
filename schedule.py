@@ -158,7 +158,7 @@ def getSchedule(file):
                     for line in data:
                         line = line.split(",")
                         temporary = []
-                        process_id = int(line[0])
+                        process_id = line[0]
 
                         arrival_time = int(line[2])
 
@@ -184,37 +184,57 @@ def getSchedule(file):
                         process_data.append(temporary)
                     if noStop == -1:
                         maxCPUbursts = int(input("Max # of CPU bursts: "))
-                #SJF.schedulingProcess(self, process_data, procBursts)
-                SJF.schedulingProcess(self, process_data)
-                print("OUT PDATA: " + str(process_data))
-                pids = []
+
+                print("INIT: " + str(process_data))
+                process_data = SJF.schedulingProcess(self, process_data)
+                print("AFTER INIT: " + str(process_data))
                 while len(procBursts) > 0:
                     process_data.reverse()
+                    pids = []
                     for instance in process_data:
-                        pid, arr, burstTime, end = instance[0], instance[1], instance[2], instance[4]
-                        for b in range(len(procBursts)):
+                        pid, arr, burstTime = instance[0], instance[1], instance[2]
+                        if len(instance) > 4:
+                            end = instance[4]
+                        b = 0
+                        while b < len(procBursts):
+                            print(procBursts)
+                            print(b)
+                            if "$" in pid:
+                                pid = pid[:pid.index("$")]
                             if pid == procBursts[b][0] and (procBursts[b][0] not in pids):
                                 pids.append(pid)
-                                print("BURST: " + str(procBursts[b]))
+                                procID = pid + "$" + str(len(procBursts[b][1][0]))
+
                                 IOtime = procBursts[b][1][0].pop(0)
                                 CPUtime = procBursts[b][1][1].pop(0)
                                 arriveTime = end + IOtime
-                                process_data.append([pid, arriveTime, CPUtime, 0])
+                                process_data.append([procID, arriveTime, CPUtime, 0])
                                 if len(procBursts[b][1][0]) == 0:
                                     procBursts.pop(b)
-                    print("")
+                            b += 1
+                    for instance in process_data:
+                        instance[3] = 0
+                        if len(instance) > 4:
+                            instance.pop(4)
+                    print("INPUT: " + str(process_data))
+                    process_data = SJF.schedulingProcess(self, process_data)
 
-                    procBursts = []
-
+                print(process_data)
+                t_time = SJF.calculateTurnaroundTime(self, process_data)
+                w_time = SJF.calculateWaitingTime(self, process_data)
+                SJF.printData(self, process_data, t_time, w_time)
 
             def schedulingProcess(self, process_data):
+                print("SCHED PROC: " + str(process_data))
                 start_time = []
                 exit_time = []
                 s_time = 0
                 process_data.sort(key=lambda x: x[1])
+
                 '''
                 Sort processes according to the Arrival Time
                 '''
+                print("SORT ARR: " + str(process_data))
                 for i in range(len(process_data)):
                     ready_queue = []
                     temp = []
@@ -230,6 +250,7 @@ def getSchedule(file):
                             normal_queue.append(temp)
                             temp = []
 
+
                     if len(ready_queue) != 0:
                         ready_queue.sort(key=lambda x: x[2])
                         '''
@@ -239,11 +260,14 @@ def getSchedule(file):
                         s_time = s_time + ready_queue[0][2]
                         e_time = s_time
                         exit_time.append(e_time)
+                        n = 0
                         for k in range(len(process_data)):
                             if process_data[k][0] == ready_queue[0][0]:
                                 break
+
                         process_data[k][3] = 1
                         process_data[k].append(e_time)
+                        print("A: " + str(process_data))
 
                     elif len(ready_queue) == 0:
                         if s_time < normal_queue[0][1]:
@@ -296,6 +320,8 @@ def getSchedule(file):
                 process_data.sort(key=lambda x: x[4])
                 for i in range(len(process_data)):
                     pid = str(process_data[i][0])
+                    if "$" in pid:
+                        pid = pid[:pid.index("$")]
 
                     tArr = str(process_data[i][1])
                     if i == 0:
