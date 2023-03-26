@@ -250,7 +250,6 @@ def getSchedule(file):
                             normal_queue.append(temp)
                             temp = []
 
-
                     if len(ready_queue) != 0:
                         ready_queue.sort(key=lambda x: x[2])
                         '''
@@ -281,9 +280,9 @@ def getSchedule(file):
                                 break
                         process_data[k][3] = 1
                         process_data[k].append(e_time)
-                #t_time = SJF.calculateTurnaroundTime(self, process_data)
-                #w_time = SJF.calculateWaitingTime(self, process_data)
-                #SJF.printData(self, process_data, t_time, w_time)
+                # t_time = SJF.calculateTurnaroundTime(self, process_data)
+                # w_time = SJF.calculateWaitingTime(self, process_data)
+                # SJF.printData(self, process_data, t_time, w_time)
                 return process_data
 
             def calculateTurnaroundTime(self, process_data):
@@ -354,19 +353,71 @@ def getSchedule(file):
 
             def processData(self, fname):
                 process_data = []
+                procBursts = []
                 with open(fname, 'r') as data:
                     for line in data:
                         line = line.split(",")
                         temporary = []
-                        process_id = int(line[0])
+                        process_id = line[0]
                         arrival_time = int(line[2])
+                        noStop = int(line[-1])
                         burst_time = int(line[3])
+                        bursts = line[4:]
                         temporary.extend([process_id, arrival_time, burst_time, 0, burst_time])
+
+                        if len(bursts) > 0:
+                            IObursts = []
+                            CPUbursts = []
+                            for i in range(len(bursts)):
+                                burst = int(bursts[i])
+                                if i % 2 == 0:
+                                    IObursts.append(burst)
+                                else:
+                                    CPUbursts.append(burst)
+                            procBursts.append([process_id, [IObursts, CPUbursts]])
+                            del IObursts, CPUbursts
+
                         '''
                         '0' is the state of the process. 0 means not executed and 1 means execution complete
                         '''
                         process_data.append(temporary)
-                STCF.schedulingProcess(self, process_data)
+                print(process_data)
+                process_data = STCF.schedulingProcess(self, process_data)[0]
+
+                while len(procBursts) > 0:
+                    process_data.reverse()
+                    pids = []
+                    for instance in process_data:
+                        pid, arr, burstTime = instance[0], instance[2], instance[3]
+                        if len(instance) > 5:
+                            end = instance[5]
+                        b = 0
+                        while b < len(procBursts):
+                            if "$" in pid:
+                                pid = pid[:pid.index("$")]
+                            # print(pid)
+                            # print(procBursts[b][0])
+                            if pid == procBursts[b][0] and (procBursts[b][0] not in pids):
+                                pids.append(pid)
+                                procID = pid + "$" + str(len(procBursts[b][1][0]))
+
+                                IOtime = procBursts[b][1][0].pop(0)
+                                CPUtime = procBursts[b][1][1].pop(0)
+                                arriveTime = end + IOtime
+                                process_data.append([procID, arriveTime, CPUtime, 0, CPUtime])
+                                if len(procBursts[b][1][0]) == 0:
+                                    procBursts.pop(b)
+                            b += 1
+                    for r in range(len(process_data)):
+                        process_data[r][3] = 0
+                        if len(process_data[r]) > 5:
+                            process_data[r].pop(5)
+                    process_data = STCF.schedulingProcess(self, process_data)[0]
+                #progSequence = process_data[1]
+                #t_time = STCF.calculateTurnaroundTime(self, process_data)
+                #w_time = STCF.calculateWaitingTime(self, process_data)
+                #print(progSequence)
+                #STCF.printData(self, process_data, t_time, w_time, progSequence)
 
             def schedulingProcess(self, process_data):
                 start_time = []
@@ -382,6 +433,8 @@ def getSchedule(file):
                     normal_queue = []
                     temp = []
                     for i in range(len(process_data)):
+                        print(process_data[i])
+                        print(s_time)
                         if process_data[i][1] <= s_time and process_data[i][3] == 0:
                             temp.extend(
                                 [process_data[i][0], process_data[i][1], process_data[i][2], process_data[i][4]])
@@ -407,10 +460,12 @@ def getSchedule(file):
                         for k in range(len(process_data)):
                             if process_data[k][0] == ready_queue[0][0]:
                                 break
-                        process_data[k][2] = process_data[k][2] - 1
-                        if process_data[k][
-                            2] == 0:  # If Burst Time of a process is 0, it means the process is completed
+                        if process_data[k][3] != 1:
+                            process_data[k][2] = process_data[k][2] - 1
+                        if process_data[k][2] <= 0:  # If Burst Time of a process is 0, it means the process is
+                            # completed
                             process_data[k][3] = 1
+                            process_data[k][2] = 0
                             process_data[k].append(e_time)
                     if len(ready_queue) == 0:
                         if s_time < normal_queue[0][1]:
@@ -431,8 +486,8 @@ def getSchedule(file):
 
                 t_time = STCF.calculateTurnaroundTime(self, process_data)
                 w_time = STCF.calculateWaitingTime(self, process_data)
-                print(process_data)
                 STCF.printData(self, process_data, t_time, w_time, sequence_of_process)
+                return process_data, sequence_of_process
 
             def calculateTurnaroundTime(self, process_data):
                 total_turnaround_time = 0
@@ -469,29 +524,29 @@ def getSchedule(file):
                 '''
                 Sort processes according to the Process ID
                 '''
-                print(
-                    "Process_ID  Arrival_Time  Rem_Burst_Time      Completed  Orig_Burst_Time Completion_Time  Turnaround_Time  Waiting_Time")
-                for i in range(len(process_data)):
-                    for j in range(len(process_data[i])):
-                        print(process_data[i][j], end="\t\t\t\t")
-                    print()
+
                 print(f'Average Turnaround Time: {average_turnaround_time}')
                 print(f'Average Waiting Time: {average_waiting_time}')
                 rSum = 0
                 for s in range(len(process_data)):
+                    print(1)
                     PID = process_data[s][0]
                     rSum += sequence_of_process.index(PID)
                 rTime_avg = rSum / len(process_data)
                 print("Average Response Time: " + str(rTime_avg))
-                print(f'Sequence of Process: {sequence_of_process}')
+                # print(f'Sequence of Process: {sequence_of_process}')
                 for i in range(len(sequence_of_process)):
                     if i == 0:
                         pid = str(sequence_of_process[0])
+                        if "$" in pid:
+                            pid = pid[:pid.index("$")]
                         print(("0:pid" + pid), end=" ")
                     elif i != 0:
                         if sequence_of_process[i] != sequence_of_process[i - 1]:
                             tComp = str(i)
                             pid = str(sequence_of_process[i])
+                            if "$" in pid:
+                                pid = pid[:pid.index("$")]
                             print((tComp + ":pid" + pid), end=" ")
                     if i == len(sequence_of_process) - 1:
                         print("END:" + str(i))
