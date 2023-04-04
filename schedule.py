@@ -559,26 +559,41 @@ def getSchedule(file):
 
             def processData(self, fname):
                 process_data = []
+                procBursts = []
                 with open(fname, 'r') as data:
                     for line in data:
                         line = line.split(",")
                         temporary = []
                         process_id = int(line[0])
-
                         arrival_time = int(line[2])
-
                         burst_time = int(line[3])
-
+                        noStop = int(line[-1])
+                        burst_time = int(line[3])
+                        bursts = line[4:]
                         temporary.extend([process_id, arrival_time, burst_time, 0, burst_time])
                         '''
                         '0' is the state of the process. 0 means not executed and 1 means execution complete
 
                         '''
+                        if len(bursts) > 0:
+                            IObursts = []
+                            CPUbursts = []
+                            for i in range(len(bursts)):
+                                burst = int(bursts[i])
+                                if i % 2 == 0:
+                                    IObursts.append(burst)
+                                else:
+                                    CPUbursts.append(burst)
+                            procBursts.append([process_id, [IObursts, CPUbursts]])
+                            del IObursts, CPUbursts
                         process_data.append(temporary)
+                    print(process_data)
+
 
                 time_slice = int(input("Enter Time Slice: "))
 
-                RoundRobin.schedulingProcess(self, process_data, time_slice)
+                process_data = RoundRobin.schedulingProcess(self, process_data, time_slice)
+                print("OUTPUT: " + str(process_data))
 
             def schedulingProcess(self, process_data, time_slice):
                 start_time = []
@@ -690,7 +705,7 @@ def getSchedule(file):
                 t_time = RoundRobin.calculateTurnaroundTime(self, process_data)
                 w_time = RoundRobin.calculateWaitingTime(self, process_data)
                 RoundRobin.printData(self, process_data, t_time, w_time, executed_process, time_slice)
-
+                return process_data
             def calculateTurnaroundTime(self, process_data):
                 total_turnaround_time = 0
                 for i in range(len(process_data)):
