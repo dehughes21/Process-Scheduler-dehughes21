@@ -48,26 +48,16 @@ def getSchedule(file):
                     if noStop == -1:
                         maxCPUbursts = int(input("Max # of CPU bursts: "))
 
-                print("PROC_BURSTS: " + str(procBursts))
-
-                print("PROCESS DATA: " + str(process_data))
                 FCFS.schedulingProcess(self, process_data, procBursts)
 
             def schedulingProcess(self, process_data, process_bursts):
-                print("UNALTERED PB " + str(process_bursts))
                 process_data.sort(key=lambda x: x[1])
-                print("BEGIN sp:" + str(process_data))
                 start_time = []
                 exit_time = []
                 s_time = 0
-                print("PD BEFORE SCHEDULE: " + str(process_data))
-                print("UPPER BOUND")
-                len_pData = len(process_data)
                 i = 0
                 time = 0
                 while i < len(process_data):
-                    print("I: " + str(i))
-                    print(str(process_data))
 
                     pid, arrival, burst = process_data[i][0], process_data[i][1], process_data[i][2]
                     if arrival > time:
@@ -78,7 +68,6 @@ def getSchedule(file):
                     exit_time.append(e_time)
                     process_data[i].append(e_time)  # Identified where a process has ended
                     for k in range(len(process_bursts)):
-                        #     print(str(pid))
                         if process_bursts[k][0] == pid:
 
                             IOtime = process_bursts[k][1][0].pop(0)
@@ -88,10 +77,8 @@ def getSchedule(file):
                             arrival = e_time + IOtime
                             process_data.append([pid, arrival, CPUtime])
                             process_data.sort(key=lambda x: x[1])
-                    # #     print(str(process_data))
                     time += burst
                     i += 1
-                print("PD AFTER SCHEDULE: " + str(process_data))
                 t_time = FCFS.calculateTurnaroundTime(self, process_data)
                 w_time = FCFS.calculateWaitingTime(self, process_data)
                 FCFS.printData(self, process_data, t_time, w_time, s_time, e_time)
@@ -185,9 +172,7 @@ def getSchedule(file):
                     if noStop == -1:
                         maxCPUbursts = int(input("Max # of CPU bursts: "))
 
-                print("INIT: " + str(process_data))
                 process_data = SJF.schedulingProcess(self, process_data)
-                print("AFTER INIT: " + str(process_data))
                 while len(procBursts) > 0:
                     process_data.reverse()
                     pids = []
@@ -197,8 +182,6 @@ def getSchedule(file):
                             end = instance[4]
                         b = 0
                         while b < len(procBursts):
-                            print(procBursts)
-                            print(b)
                             if "$" in pid:
                                 pid = pid[:pid.index("$")]
                             if pid == procBursts[b][0] and (procBursts[b][0] not in pids):
@@ -216,16 +199,14 @@ def getSchedule(file):
                         instance[3] = 0
                         if len(instance) > 4:
                             instance.pop(4)
-                    print("INPUT: " + str(process_data))
+
                     process_data = SJF.schedulingProcess(self, process_data)
 
-                print(process_data)
                 t_time = SJF.calculateTurnaroundTime(self, process_data)
                 w_time = SJF.calculateWaitingTime(self, process_data)
                 SJF.printData(self, process_data, t_time, w_time)
 
             def schedulingProcess(self, process_data):
-                print("SCHED PROC: " + str(process_data))
                 start_time = []
                 exit_time = []
                 s_time = 0
@@ -234,7 +215,6 @@ def getSchedule(file):
                 '''
                 Sort processes according to the Arrival Time
                 '''
-                print("SORT ARR: " + str(process_data))
                 for i in range(len(process_data)):
                     ready_queue = []
                     temp = []
@@ -266,7 +246,6 @@ def getSchedule(file):
 
                         process_data[k][3] = 1
                         process_data[k].append(e_time)
-                        print("A: " + str(process_data))
 
                     elif len(ready_queue) == 0:
                         if s_time < normal_queue[0][1]:
@@ -381,7 +360,6 @@ def getSchedule(file):
                         '0' is the state of the process. 0 means not executed and 1 means execution complete
                         '''
                         process_data.append(temporary)
-                print(process_data)
                 process_data = STCF.schedulingProcess(self, process_data)[0]
 
                 while len(procBursts) > 0:
@@ -395,8 +373,6 @@ def getSchedule(file):
                         while b < len(procBursts):
                             if "$" in pid:
                                 pid = pid[:pid.index("$")]
-                            # print(pid)
-                            # print(procBursts[b][0])
                             if pid == procBursts[b][0] and (procBursts[b][0] not in pids):
                                 pids.append(pid)
                                 procID = pid + "$" + str(len(procBursts[b][1][0]))
@@ -413,11 +389,6 @@ def getSchedule(file):
                         if len(process_data[r]) > 5:
                             process_data[r].pop(5)
                     process_data = STCF.schedulingProcess(self, process_data)[0]
-                #progSequence = process_data[1]
-                #t_time = STCF.calculateTurnaroundTime(self, process_data)
-                #w_time = STCF.calculateWaitingTime(self, process_data)
-                #print(progSequence)
-                #STCF.printData(self, process_data, t_time, w_time, progSequence)
 
             def schedulingProcess(self, process_data):
                 start_time = []
@@ -433,8 +404,6 @@ def getSchedule(file):
                     normal_queue = []
                     temp = []
                     for i in range(len(process_data)):
-                        print(process_data[i])
-                        print(s_time)
                         if process_data[i][1] <= s_time and process_data[i][3] == 0:
                             temp.extend(
                                 [process_data[i][0], process_data[i][1], process_data[i][2], process_data[i][4]])
@@ -529,7 +498,6 @@ def getSchedule(file):
                 print(f'Average Waiting Time: {average_waiting_time}')
                 rSum = 0
                 for s in range(len(process_data)):
-                    print(1)
                     PID = process_data[s][0]
                     rSum += sequence_of_process.index(PID)
                 rTime_avg = rSum / len(process_data)
@@ -567,8 +535,6 @@ def getSchedule(file):
                         process_id = int(line[0])
                         arrival_time = int(line[2])
                         burst_time = int(line[3])
-                        noStop = int(line[-1])
-                        burst_time = int(line[3])
                         bursts = line[4:]
                         temporary.extend([process_id, arrival_time, burst_time, 0, burst_time])
                         '''
@@ -587,13 +553,10 @@ def getSchedule(file):
                             procBursts.append([process_id, [IObursts, CPUbursts]])
                             del IObursts, CPUbursts
                         process_data.append(temporary)
-                    print(process_data)
-
 
                 time_slice = int(input("Enter Time Slice: "))
 
-                process_data = RoundRobin.schedulingProcess(self, process_data, time_slice)
-                print("OUTPUT: " + str(process_data))
+                RoundRobin.schedulingProcess(self, process_data, time_slice)
 
             def schedulingProcess(self, process_data, time_slice):
                 start_time = []
@@ -748,8 +711,7 @@ def getSchedule(file):
 
                 print(f'Average Waiting Time: {average_waiting_time}')
 
-                print(process_data)
-                print(f'Sequence of Processes: {executed_process}')
+
                 run = [0]
                 for i in range(len(executed_process)):
                     pid = executed_process[i]
@@ -775,7 +737,6 @@ def getSchedule(file):
                     time = str(timeList[u])
                     print((time + ":pid" + pid), end=" ")
                 print(str(finalBurst + timeList[len(timeList) - 1]) + ":END")
-                print(timeList)
                 rSum = 0
                 for n in range(len(process_data)):
                     PID = process_data[n][0]
