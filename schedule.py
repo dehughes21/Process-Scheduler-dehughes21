@@ -1,6 +1,5 @@
 import random
-
-
+ 
 def getNumProcs(fname):
     i = 0
     with open(fname, 'r') as file:
